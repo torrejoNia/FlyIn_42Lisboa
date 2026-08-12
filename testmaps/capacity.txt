@@ -1,0 +1,14 @@
+# All five drones must move to a1.
+# Then, only two of the drones may move to a2
+# because of its lower max_link_capacity.
+
+nb_drones: 5
+
+start_hub: start 0 0 [color=black]
+hub: a1 1 0 [color=royalblue max_drones=10]
+hub: a2 2 0 [color=royalblue max_drones=5]
+end_hub: end 3 0 [color=black]
+
+connection: start-a1 [max_link_capacity=20]
+connection: a1-a2 [max_link_capacity=2]
+connection: a2-end [max_link_capacity=5]

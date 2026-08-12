@@ -1,0 +1,8 @@
+nb_drones: 1
+
+start_hub: start 0 0 [color=black]
+hub: a1 1 0 [color=green color=red]  # Duplicated metadata. Color will be red.
+end_hub: end 2 0 [color=black]
+
+connection: start-a1
+connection: a1-end

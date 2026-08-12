@@ -1,0 +1,34 @@
+nb_drones: 50
+
+start_hub: start 0 0 [color=black]
+hub: a1 1 -2 [zone=priority color=yellow]
+hub: a2 1 -1 [zone=priority color=yellow]
+hub: a3 1 0 [color=gray]
+hub: a4 1 1 [color=gray]
+hub: a5 1 2 [color=gray]
+hub: junction1 2 0 [color=red max_drones=2]
+hub: b1 3 -1 [color=gray]
+hub: b2 3 1 [zone=priority color=yellow]
+hub: junction2 4 0 [color=red max_drones=2]
+hub: c1 5 -1 [zone=priority color=yellow]
+hub: c2 5 1 [color=gray]
+end_hub: end 6 0 [color=black]
+
+connection: start-a1
+connection: start-a2
+connection: start-a3
+connection: start-a4
+connection: start-a5
+connection: a1-junction1
+connection: a2-junction1
+connection: a3-junction1
+connection: a4-junction1
+connection: a5-junction1
+connection: junction1-b1
+connection: junction1-b2
+connection: b1-junction2
+connection: b2-junction2
+connection: junction2-c1
+connection: junction2-c2
+connection: c1-end
+connection: c2-end

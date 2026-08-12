@@ -1,0 +1,12 @@
+nb_drones: 10
+
+start_hub: start 0 0 [color=black]
+hub: a1 1 0 [zone=restricted color=orange]
+hub: a2 2 0 [zone=restricted color=orange]
+hub: a3 3 0 [zone=restricted color=orange]
+end_hub: end 4 0 [color=black]
+
+connection: start-a1
+connection: a1-a2
+connection: a2-a3
+connection: a3-end

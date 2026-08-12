@@ -1,0 +1,9 @@
+nb_drones: 1
+nb_drones: 1
+
+start_hub: start 0 0 [color=black]
+hub: a1 1 0
+end_hub: end 2 0 [color=black]
+
+connection: start-a1
+connection: a1-end

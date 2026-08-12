@@ -1,0 +1,127 @@
+FlyIn - How the program works
+
+Overview
+
+FlyIn is a pygame simulation of drones moving through a graph of zones.
+The goal is to move every drone from the start hub to the end hub without
+collisions, while showing the movement in a visual window.
+
+Startup flow
+
+1. The program starts in __main__.py.
+2. If a map path is passed on the command line, that file is loaded directly.
+3. Otherwise, the program prints a menu of available .txt maps from maps/
+   and testmaps/ and asks the user to choose one.
+4. pygame is initialized, the assets are loaded, and the selected map is
+   parsed and turned into game objects.
+
+Map parsing
+
+The map file is read by parser.py with a Lark grammar.
+The file must define:
+
+- the number of drones
+- one start_hub
+- one end_hub
+- optional intermediate hubs
+- connections between hubs
+
+Each hub can also define metadata such as:
+
+- zone type: normal, blocked, restricted, or priority
+- color
+- max_drones
+- max_link_capacity for links
+
+The parser validates that hub names are unique, the required data exists,
+and every link points to valid hubs.
+
+Building the simulation
+
+builder.py converts the parsed data into runtime objects:
+
+- Zone objects for hubs
+- Drone objects placed on the start hub
+- Link objects connecting zones
+
+Links also register themselves on both connected zones, so each zone knows
+which neighbors it can reach.
+
+Main game objects
+
+Zone
+
+- Represents a node in the graph.
+- Stores its position, zone type, color, capacity, and neighbors.
+- Keeps track of how many drones are currently inside it.
+
+Link
+
+- Represents an edge between two zones.
+- Stores link capacity and current drone load.
+- Draws the connection line on screen.
+
+Drone
+
+- Represents one moving agent.
+- Stores its current zone, path, and sprite state.
+- Moves one step at a time when a turn is executed.
+
+Pathfinding
+
+Before the simulation starts, every drone calculates a path with a Dijkstra-
+style search.
+
+The important detail is that drones are processed in priority order:
+
+- earlier drones reserve traffic on their path
+- later drones see that traffic as extra cost
+
+This makes later drones prefer alternative routes when possible.
+
+The path cost is affected by:
+
+- traffic already assigned to a zone
+- restricted zones, which are more expensive
+- priority zones, which are cheaper
+
+If a drone cannot find a path, the program prints a warning.
+
+Turn execution
+
+The simulation advances in turns.
+
+When a turn happens, each drone tries to move to the next zone in its path.
+Movement is blocked if:
+
+- the destination zone is already full
+- the link is at capacity
+
+Restricted zones cause a drone to lag for one extra turn after entering.
+That lag is visualized by swapping the drone sprite.
+
+User interaction
+
+- Left mouse button: execute one turn
+- Right mouse button held: pan the camera
+- Space: toggle autoplay
+- Escape or window close: quit
+
+Rendering
+
+Every frame, pygame redraws:
+
+- the background
+- all links
+- all zones
+- all drones
+- hover text for the zone under the mouse
+- the on-screen control instructions
+
+Autoplay runs turns automatically every 250 ms.
+
+In short
+
+FlyIn loads a graph map, creates drones and zones, computes paths with a
+traffic-aware Dijkstra approach, and then animates the drones moving turn by
+turn until they reach the end hub.
