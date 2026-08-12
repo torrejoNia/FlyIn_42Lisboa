@@ -7,6 +7,7 @@ from zone import Zone, ZoneType
 from link import Link
 
 
+#Final dictionary that the parser will produce.
 class TransformedTree(TypedDict):
     nb_drones: int | None
     start_hub: dict[str, Any] | None
