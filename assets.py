@@ -13,9 +13,9 @@ NAMES: list[str] = webcolors.names() + ['rainbow']
 
 pygame.font.init()
 FONT: pygame.font.Font = pygame.font.Font(
-    'font/lovely-pixels.otf', size=24)
+    'font/gocake.otf', size=24)
 FONT_BIG: pygame.font.Font = pygame.font.Font(
-    'font/lovely-pixels.otf', size=48)
+    'font/gocake.otf', size=48)
 
 
 def get_colored(image: str, color: str) -> Surface:

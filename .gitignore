@@ -15,5 +15,3 @@ dmypy.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
-
-README.md
