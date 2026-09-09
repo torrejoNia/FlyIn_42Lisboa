@@ -1,8 +1,9 @@
 # Suppress errors for module imports not at top of file,
 # because we have to set the env variable before pygame imports.
 # flake8: noqa: E402
-import sys
+import argparse
 import os
+import sys
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from pathlib import Path
 
@@ -20,12 +21,30 @@ from formatting import X, H, D, R, Y
 
 
 turncount = 0
+capacity_info = False
 
 
-def execute_turn(goal: Zone, drones: list[Drone], links: list[Link]) -> None:
+def print_capacity_info(zones: dict[str, Zone], links: list[Link]) -> None:
+    "Print the current occupancy of all zones and links."
+    print(f'{D}Capacity information:{X}')
+    for zone in zones.values():
+        print(f'Zone {zone.name}: {zone.drone_load}/{zone.max_drones} drones')
+    for link in links:
+        print(
+            f'Connection {link}: '
+            f'{link.drone_load}/{link.max_link_capacity} capacity used'
+        )
+    print()
+
+
+def execute_turn(
+        goal: Zone,
+        drones: list[Drone],
+        links: list[Link],
+        zones: dict[str, Zone] | None = None) -> None:
     "Allow all drones to make a move towards the goal."
     global turncount
-    if all([drone.zone is goal for drone in drones]):
+    if all(drone.zone is goal for drone in drones):
         return
     turncount += 1
     for link in links:
@@ -34,6 +53,8 @@ def execute_turn(goal: Zone, drones: list[Drone], links: list[Link]) -> None:
         if drone.zone is goal:
             continue
         drone.move(links)
+    if capacity_info and zones is not None:
+        print_capacity_info(zones, links)
     print()
 
 
@@ -60,8 +81,24 @@ def list_maps(directory: Path, index: int = 0) -> list[Path]:
 
 # Get the map file.
 # -----------------------------------------------------------------------------
-if len(sys.argv) > 1:
-    data = Path(sys.argv[1])
+parser = argparse.ArgumentParser(
+    description='FlyIn drone routing simulation.',
+)
+parser.add_argument(
+    '--capacity-info',
+    action='store_true',
+    help='Display zone and connection capacity usage after every turn.',
+)
+parser.add_argument(
+    'map',
+    nargs='?',
+    help='Optional path to a map file. If omitted, an interactive menu is shown.',
+)
+args = parser.parse_args()
+capacity_info = args.capacity_info
+
+if args.map is not None:
+    data = Path(args.map)
 else:
     print(f'{D}No map argument given, defaulting to interactive mode.{X}')
 
@@ -119,7 +156,7 @@ traffic = {x: 0 for x in zones}
 for drone in drones:
     for zone in drone.dijkstras(list(zones.values()), end, traffic):
         traffic[zone.name] += 1
-if any([not drone.path for drone in drones]):
+if any(not drone.path for drone in drones):
     print(
         f'{Y}Warning: Drones could not find a path to the exit.{X}',
         file=sys.stderr
@@ -179,7 +216,7 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed()[0]:
-                execute_turn(end, drones, links)
+                execute_turn(end, drones, links, zones)
         if event.type == pygame.KEYDOWN:
             if keys[pygame.K_SPACE]:
                 autoplay, autoplay_timer = not autoplay, 0
@@ -216,7 +253,7 @@ while running:
         autoplay_timer -= clock.get_time()
         if autoplay_timer <= 0:
             autoplay_timer += 250
-            execute_turn(end, drones, links)
+            execute_turn(end, drones, links, zones)
 
 # Optionally print total turn count for debugging.
 # print('Turn count:', turncount)
