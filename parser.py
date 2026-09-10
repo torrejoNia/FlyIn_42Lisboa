@@ -2,12 +2,11 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from lark import Lark, Transformer
-
-from zone import Zone, ZoneType
 from link import Link
+from zone import Zone, ZoneType
 
 
-#Final dictionary that the parser will produce.
+# Final dictionary that the parser will produce.
 class TransformedTree(TypedDict):
     nb_drones: int | None
     start_hub: dict[str, Any] | None
@@ -119,30 +118,8 @@ class TreeToMap(Transformer[Any, TransformedTree]):
         return result
 
 
-def parse(filename: Path) -> dict[str, Any]:
-    """Parse map data from a file.
-
-    Args:
-        filename: Path to read from.
-
-    Returns:
-        Dictionary containing data to be used for building the map.
-        All hubs are given as dictionaries, and can be unpacked
-        to build the hub objects (`Zone(**hub)`).
-
-        Links/connections are tuples of `(from, to, capacity)`.
-        - `nb_drones` - Number of drones.
-        - `start_hub` - Starting hub.
-        - `end_hub` - End hub.
-        - `hubs` - List of hubs, excluding start and end hubs.
-        - `links` - List of links.
-
-    Raises:
-        LarkError: When the input map file contains Lark parser errors.
-        ParsingError: When the input map file contains miscellaneous errors.
-    """
-
-    grammar = r"""
+class Parser:
+    GRAMMAR = r"""
 start: nb_drones hub* connection*
 
 ?hub: start_hub
@@ -181,24 +158,36 @@ COMMENT: /#[^\n]*/
 %ignore COMMENT
     """
 
-    map_parser = Lark(grammar, parser='lalr', transformer=TreeToMap())
-    with filename.open("r", encoding="utf-8") as file:
-        tree = map_parser.parse(file.read())
-        assert isinstance(tree, dict)
+    def __init__(self) -> None:
+        self.map_parser = Lark(
+            self.GRAMMAR,
+            parser='lalr',
+            transformer=TreeToMap(),
+        )
 
-        # Checking that critical data is supplied.
-        missing = {x for x in tree if tree[x] is None}
-        if missing:
-            raise ParsingError(f'Critical map data is missing: {missing}.')
+    def parse(self, filename: Path) -> dict[str, Any]:
+        """Parse map data from a file."""
+        with filename.open("r", encoding="utf-8") as file:
+            tree = self.map_parser.parse(file.read())
+            assert isinstance(tree, dict)
 
-        # Checking that links connect to valid hubs.
-        all_hubs = [x['name'] for x in tree['hubs']] \
-            + [tree['start_hub']['name'], tree['end_hub']['name']]
-        for link in tree['links']:
-            if link['hubs'][0] not in all_hubs \
-                    or link['hubs'][1] not in all_hubs:
-                raise ParsingError(
-                    f'Link "{"-".join(link['hubs'])}"'
-                    ' connects to an invalid hub.')
+            missing = {x for x in tree if tree[x] is None}
+            if missing:
+                raise ParsingError(f'Critical map data is missing: {missing}.')
 
-        return tree
+            if tree['start_hub']['zonetype'] == ZoneType.BLOCKED:
+                raise ParsingError('start_hub cannot be blocked.')
+            if tree['end_hub']['zonetype'] == ZoneType.BLOCKED:
+                raise ParsingError('end_hub cannot be blocked.')
+
+            all_hubs = [x['name'] for x in tree['hubs']] \
+                + [tree['start_hub']['name'], tree['end_hub']['name']]
+            for link in tree['links']:
+                if link['hubs'][0] not in all_hubs \
+                        or link['hubs'][1] not in all_hubs:
+                    raise ParsingError(
+                        f'Link "{"-".join(link["hubs"])}"'
+                        ' connects to an invalid hub.'
+                    )
+
+            return tree

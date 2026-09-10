@@ -4,7 +4,7 @@ from typing import TypedDict
 import pygame
 from pygame import Vector2
 
-import assets
+from assets import Assets
 from zone import Zone, ZoneType
 from link import Link
 
@@ -29,8 +29,8 @@ class Drone:
     def __post_init__(self) -> None:
         self.pos = Vector2(0, 0)
         self.speed = Vector2(0, 0)
-        self.img = assets.IMG['drone']
-        self.alt_img = assets.get_colored('drone', 'black')
+        self.img = Assets.IMG['drone']
+        self.alt_img = Assets.get_colored('drone', 'black')
         self.rect = self.img.get_rect(center=(self.pos.x, self.pos.y))
         self.lagged = False
         self.path: list[Zone] = []
@@ -50,10 +50,10 @@ class Drone:
         # Get and set the link load and capacity.
         link_cap, link_load = 0, 0
         key = "-".join(sorted([self.zone.name, dest.name]))
-        for x in links:
-            if str(x) == key:
-                link_cap, link_load = x.max_link_capacity, x.drone_load
-                x.drone_load += 1
+        for link in links:
+            if str(link) == key:
+                link_cap, link_load = link.max_link_capacity, link.drone_load
+                link.drone_load += 1
                 break
 
         if dest.zonetype != ZoneType.END:
@@ -98,7 +98,7 @@ class Drone:
         g[self.zone.name]['cost'] = 0
 
         while queue:
-            for z, i in queue[0].neighbors:
+            for z, _capacity in queue[0].neighbors:
                 if z.zonetype == ZoneType.BLOCKED:
                     continue
                 if z.name not in visited:

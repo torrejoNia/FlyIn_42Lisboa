@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import pygame
 from pygame import Vector2
 
-import assets
+from assets import Assets
 
 
 class ZoneType(Enum):
@@ -42,13 +42,13 @@ class Zone:
         self.pos = Vector2(self.x * 128, self.y * 128)
         self.hovered = False
 
-        self.img = assets.get_colored(
+        self.img = Assets.get_colored(
             f'zone_{self.zonetype.name.lower()}', self.color)
         self.rect = self.img.get_rect(center=self.pos)
 
         # Creating the zone's name label.
         self.nametext = pygame.font.Font.render(
-            assets.FONT_BIG,
+            Assets.FONT_BIG,
             f'{self.name}',
             True,
             (255, 255, 255),
@@ -57,13 +57,13 @@ class Zone:
         self.nametext_rect = self.nametext.get_rect(center=(800, 1100))
 
         # Creating the max_drones label.
-        self.label = assets.IMG['label']
+        self.label = Assets.IMG['label']
         self.label_rect = self.label.get_rect(
             left=self.pos.x - 64,
             top=self.pos.y - 32,
         )
         self.labeltext = pygame.font.Font.render(
-            assets.FONT,
+            Assets.FONT,
             f'{self.max_drones:>2}',
             True,
             (255, 255, 255)
