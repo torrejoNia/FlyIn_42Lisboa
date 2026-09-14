@@ -54,8 +54,6 @@ class FlyInApp:
             if drone.zone is goal:
                 continue
             drone.move(links)
-        if self.capacity_info and zones is not None:
-            self.print_capacity_info(zones, links)
         print()
 
     def list_maps(self, directory: Path, index: int = 0) -> list[Path]:

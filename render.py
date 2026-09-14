@@ -115,7 +115,7 @@ class Renderer:
             if autoplay:
                 autoplay_timer -= clock.get_time()
                 if autoplay_timer <= 0:
-                    autoplay_timer += 250
+                    autoplay_timer += 550
                     execute_turn(end, drones, links, zones)
 
         pygame.quit()
