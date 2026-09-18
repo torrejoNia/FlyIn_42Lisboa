@@ -123,8 +123,12 @@ class FlyInApp:
                 )
                 print(f'{R}Error: {e}{X}', file=sys.stderr)
                 sys.exit(1)
+            try:
+                map_index = int(input('Input index of map to load: ' + H))
+            except Exception:
+                print("Need to input a valid number")
+                sys.exit(1)
 
-            map_index = int(input('Input index of map to load: ' + H))
             if 0 <= map_index < len(maps):
                 data = Path(maps[map_index])
             else:
@@ -154,6 +158,7 @@ class FlyInApp:
                 f'{Y}Warning: Drones could not find a path to the exit.{X}',
                 file=sys.stderr
             )
+            sys.exit(1)
 
         self.renderer.run(drones, end, zones, links, self.execute_turn)
         print(f'{D}Turn count: {self.turncount}{X}')
@@ -162,5 +167,5 @@ class FlyInApp:
 if __name__ == '__main__':
     try:
         FlyInApp().run()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         print()
